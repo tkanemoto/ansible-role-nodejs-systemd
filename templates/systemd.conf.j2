@@ -1,0 +1,18 @@
+[Unit]
+Description={{ item.description | default(item.name) }}
+
+[Service]
+ExecStart={{ item.start }}
+ExecStop={{ item.stop }}
+Restart=always
+User={{ item.user }}
+Group={{ item.group }}
+{% if item.environment is defined %}
+{% for env in item.environment %}
+Environment={{ env.name }}={{ env.value }}
+{% endfor %}
+{% endif %}
+WorkingDirectory={{ item.work_dir }}
+
+[Install]
+WantedBy=multi-user.target

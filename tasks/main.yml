@@ -1,0 +1,65 @@
+---
+# tasks file for nodejs-systemd
+
+- name: Create node.js instance groups
+  group:
+    name={{ item.group }}
+    system=yes
+    state=present
+  with_items: '{{ nodejs_instances }}'
+  tags: nodejs
+
+- name: Create node.js instance user
+  user:
+    name={{ item.user }}
+    append=yes
+    group={{ item.group }}
+    shell=/bin/bash
+    system=yes
+    state=present
+  with_items: '{{ nodejs_instances }}'
+  tags: nodejs
+
+- name: Checkout app
+  git:
+    repo={{ item.repo }}
+    dest={{ item.dir }}
+    version={{ item.version }}
+    update={{ item.keep_updated }}
+    recursive={{ item.repo_recursive }}
+  with_items: '{{ nodejs_instances }}'
+  tags: nodejs
+
+- name: Change ownership
+  file:
+    state=directory
+    recurse=yes
+    path={{ item.dir }}
+    owner={{ item.user }}
+    group={{ item.group }}
+  with_items: '{{ nodejs_instances }}'
+  tags: nodejs
+
+- name: Run npm install
+  npm: path={{ item.work_dir }}
+  with_items: '{{ nodejs_instances }}'
+  tags: nodejs
+
+- name: Install systemd conf
+  template: >
+    src=systemd.conf.j2
+    dest=/etc/systemd/system/nodejs-{{ item.name }}.service
+    owner=root
+    group=root
+    mode=0755
+  with_items: '{{ nodejs_instances }}'
+  tags: nodejs
+
+- name: Make sure we reload services
+  command: systemctl daemon-reload
+  tags: nodejs
+
+- name: Ensure services are started and enabled on boot
+  service: name=nodejs-{{ item.name }} state=started enabled=yes
+  with_items: '{{ nodejs_instances }}'
+  tags: nodejs
