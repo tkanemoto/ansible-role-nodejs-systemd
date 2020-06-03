@@ -27,6 +27,7 @@
     version={{ item.version }}
     update={{ item.keep_updated }}
     recursive={{ item.repo_recursive }}
+    force={{ item.force }}
   with_items: '{{ nodejs_instances }}'
   tags: nodejs
 
@@ -43,6 +44,15 @@
 - name: Run npm install
   npm: path={{ item.work_dir }}
   with_items: '{{ nodejs_instances }}'
+  tags: nodejs
+
+- name: Copy config files
+  template: >
+    src={{ item.src }}
+    dest={{ item.dir }}/{{ item.name }}
+    owner={{ item.user }}
+    group={{ item.group }}
+  with_items: '{{ nodejs_config_files }}'
   tags: nodejs
 
 - name: Install systemd conf

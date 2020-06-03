@@ -2,3 +2,5 @@
 # defaults file for nodejs-systemd
 
 nodejs_instances: []
+
+nodejs_config_files: []
