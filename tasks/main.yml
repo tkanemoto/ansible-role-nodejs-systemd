@@ -27,6 +27,7 @@
     version={{ item.version }}
     update={{ item.keep_updated }}
     recursive={{ item.repo_recursive }}
+    force={{ item.force }}
   with_items: '{{ nodejs_instances }}'
   tags: nodejs
 
